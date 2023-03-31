@@ -1,57 +1,58 @@
 import re
+from datetime import datetime
 import openpyxl
-import datetime
-import time
+from collections import defaultdict, Counter
 
-# 打开日志文件并读取内容
-with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
+# 定义正则表达式
+time_regex = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}')
+
+# 读取日志文件
+with open('D:/testLog.txt', 'r',encoding='utf-8') as f:
     logs = f.readlines()
-    f.close()
 
-# 设置时间段
-start_time = '2023-03-01 00:00:00'
-end_time = '2023-03-10 23:00:00'
+# 定义时间段
+start_time =datetime.strptime('2023-03-09 00:00:00','%Y-%m-%d %H:%M:%S')
+end_time = datetime.strptime('2023-03-11 00:00:00','%Y-%m-%d %H:%M:%S')
 
-# 定义一个字典，用于存储请求类型和URL以及它们的请求次数
-req_dict = {}
+# 定义字典，用于存储分类后的日志记录
+logs_dict = defaultdict(int)
 
 # 遍历日志文件中的每一行记录
-for line in logs:
-    # 使用正则表达式提取出记录中的请求时间、请求类型和URL
-    # pattern = r'^\d{4}-\d{2}-\d{2}\s\d{2}:\d{2}:\d{2}'
-    # match = re.search(pattern, line)
-    t=time.strptime(line[0:19], '%Y-%m-%d %H:%M:%S')
-    if match:
-        # req_time = match.group(1)
-        method, uri = match.group(2).split()
-        req_status = match.group(3)
-        req_size = match.group(4)
+for log in logs:
+    # 使用正则表达式匹配时间
+    time_match = time_regex.search(log)
+    if time_match:
+        date_str = time_match.group()
+        # 将字符串类型的时间转换成 datetime.datetime 类型的对象
+        date_obj = datetime.strptime(date_str,  '%Y-%m-%d %H:%M:%S')
+        # 判断时间是否在指定的时间段内
+        if start_time <= date_obj <= end_time:
+            # 使用正则表达式匹配请求类型和 URL
+            match_result = re.search(r'\[method\s*=\s*(\w+),\s*uri\s*=\s*([^,\s]*)', log)
+            if match_result:
+                # 获取请求类型和 URL
+                method = match_result.group(1)
+                url = match_result.group(2)
+                # 将 URL 中的数字替换为 ID
+                url_new = re.sub(r'/(\d+)', '/id', url)
+                # 将请求类型和 URL 作为键，增加请求次数
+                logs_dict[(method, url_new)] += 1
+                # print(url_new)
+                print(logs_dict)
 
-        # 如果请求时间在指定的时间段内，将请求类型和URL存储到字典中
-        if start_time <= t <= end_time:
-            key = (method, uri)
-            if key in req_dict:
-                req_dict[key] += 1
-            else:
-                req_dict[key] = 1
-
-# 创建Excel表格并写入数据x
+# 将结果输出到 Excel 文件中
 wb = openpyxl.Workbook()
 ws = wb.active
-ws.title = '请求汇总'
+ws.title = 'Logs'
 
-# 写入表头
-ws.cell(1, 1, '请求类型')
-ws.cell(1, 2, 'URL')
-# ws.cell(1, 3, '请求次数')
+ws.append(['method','url','count'])
+for (method,url),count in logs_dict.items():
+    ws.append([method, url, count])
 
-# 遍历字典中的数据，写入Excel表格
-row = 2
-for key, value in req_dict.items():
-    ws.cell(row, 1, key[0])
-    ws.cell(row, 2, key[1])
-    # ws.cell(row, 3, value)
-    row += 1
-
-# 保存Excel表格
-wb.save('req_summary.xlsx')
+# 保存 Excel 文件
+try:
+    wb.save('results.xlsx')
+except PermissionError:
+        print(f'文件保存失败：没有写入权限')
+else:
+    print('没有匹配到结果')

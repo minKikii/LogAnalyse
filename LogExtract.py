@@ -3,14 +3,12 @@ import datetime
 from datetime import datetime,timedelta
 import openpyxl
 
-
 pattern=re.compile(r'\[method\s*=\s*(\w+),\s*uri\s*=\s*([^,\s]*)')
 timePattern = re.compile(r'\s*\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}')
 start_time =datetime.strptime('2023-03-09 00:00:00','%Y-%m-%d %H:%M:%S')
 end_time = datetime.strptime('2023-03-11 00:00:00','%Y-%m-%d %H:%M:%S')
-
 results = []
-lines_without_time = []
+
 with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
     logs=f.readlines()
     for log in logs:
@@ -21,7 +19,6 @@ with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
                 logTime  = datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S')
             except ValueError:
                 continue
-
             if start_time <= logTime <= end_time:
                 match_request = pattern.search(log)
                 if match_request:
@@ -31,7 +28,6 @@ with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
                     }
                     results.append(result)
                     print(results)
-
 
 if results:
     print(results)  # 输出: [{'method': ', 'uri': ']# 将结果写入 Excel 文件
