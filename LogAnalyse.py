@@ -1,14 +1,18 @@
-import re
+import re,os
 from datetime import datetime
 import openpyxl
 from collections import defaultdict, Counter
 
+
+logPath='D:/testLog'
+fileList=os.listdir(logPath)
 # 定义正则表达式
 time_regex = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}')
 
 # 读取日志文件
-with open('D:/testLog.txt', 'r',encoding='utf-8') as f:
-    logs = f.readlines()
+for file in fileList:
+    with open(os.path.join(logPath,file), 'r',encoding='utf-8') as f:
+        logs = f.readlines()
 
 # 定义时间段
 start_time =datetime.strptime('2023-03-09 00:00:00','%Y-%m-%d %H:%M:%S')

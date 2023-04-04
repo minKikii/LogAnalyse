@@ -11,13 +11,22 @@ import datetime
 # if s:
 # print(s.group(5))
 
-timePatten = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\d{3}')
-with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
-    logs = f.readlines()
-    for log in logs:
-        time_match=timePatten.search(log)
-        if time_match:
-            log_time = time_match.group()
-            logTime  = datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S.%f')
-            print(logTime)
+# timePatten = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}\d{3}')
+# with open('D:/testLog.txt', 'r',encoding='UTF-8') as f:
+#     logs = f.readlines()
+#     for log in logs:
+#         time_match=timePatten.search(log)
+#         if time_match:
+#             log_time = time_match.group()
+#             logTime  = datetime.strptime(log_time, '%Y-%m-%d %H:%M:%S.%f')
+#             print(logTime)
 
+
+import os
+
+logPath='D:/testLog'
+fileList=os.listdir(logPath)
+
+for file in fileList:
+    with open(os.path.join(logPath,file)) as f:
+        print(file)
