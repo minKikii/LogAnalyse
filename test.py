@@ -1,10 +1,11 @@
-import re,os
+import os,tarfile,gzip
+import re
 from datetime import datetime
 import openpyxl
 from collections import defaultdict, Counter
 
 
-logPath='D:/testLog/'
+logPath='D:/log.tar'
 fileList=os.listdir(logPath)
 # 定义正则表达式
 time_regex = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}')
@@ -16,7 +17,7 @@ logs_dict = defaultdict(int)
 
 # 读取日志文件
 for file in fileList:
-    with open(os.path.join(logPath,file), 'r',encoding='utf-8') as f:
+    with tarfile.open(os.path.join(logPath,file), 'r',encoding='utf-8') as f:
         logs = f.readlines()
         print(file)
         for log in logs:
