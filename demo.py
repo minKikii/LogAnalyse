@@ -4,12 +4,16 @@ import openpyxl
 from collections import defaultdict, Counter
 
 
-logPath='D:/testLog/'
-fileList=os.listdir(logPath)
+# logPath='D:/testLog/'
+# fileList=os.listdir(logPath)
 # 定义正则表达式
 time_regex = re.compile(r'\d{4}-\d{2}-\d{2}\s+\d{2}:\d{2}:\d{2}')
-start_time =datetime.strptime('2023-03-09 00:00:00','%Y-%m-%d %H:%M:%S')
-end_time = datetime.strptime('2023-03-11 00:00:00','%Y-%m-%d %H:%M:%S')
+# start_time =datetime.strptime('2023-03-09 00:00:00','%Y-%m-%d %H:%M:%S')
+# end_time = datetime.strptime('2023-03-11 00:00:00','%Y-%m-%d %H:%M:%S')
+time_ranges = [
+    {'start':'05:00:00','end':'06:00:00'},
+    {'start':'08:00:00','end':'09:00:00'}
+]
 
 # 定义字典，用于存储分类后的日志记录
 logs_dict = defaultdict(int)
@@ -23,9 +27,7 @@ for filename in fileList:
             for member in tar.getmembers():
                 if member.name.endswith('.gz'):
                     with gzip.open(tar.extractfile(member)) as f:
-                        # f=f.decode('utf-8')
                         logs = f.readlines()
-                        print(member)
                         for log in logs:
                             log=log.decode('utf-8')
                             time_match = time_regex.search(log)
@@ -33,9 +35,20 @@ for filename in fileList:
                                 date_str = time_match.group()
                                 # 将字符串类型的时间转换成 datetime.datetime 类型的对象
                                 date_obj = datetime.strptime(date_str, '%Y-%m-%d %H:%M:%S')
-                                if start_time <= date_obj <= end_time:
+                                # print(date_obj)
+                                in_time_range = False
+                                # if start_time <= date_obj <= end_time:
+                                for time_range in time_ranges:
+                                    start_time = datetime.strptime(time_range['start'], '%H:%M:%S').time()
+                                    end_time = datetime.strptime(time_range['end'], '%H:%M:%S').time()
+                                    if start_time <= date_obj.time() <= end_time:
+                                        in_time_range = True
+                                    #     break
+                                    # if not in_time_range:
+                                    #     continue
                                     # 使用正则表达式匹配请求类型和 URL
                                     match_result = re.search(r'\[method\s*=\s*(\w+),\s*uri\s*=\s*([^,\s]*)', log)
+                                    # print(match_result)
                                     if match_result:
                                         method = match_result.group(1)
                                         url = match_result.group(2)
